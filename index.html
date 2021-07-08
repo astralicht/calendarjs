@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>repl.it</title>
+    <style>
+      body{
+        font-family: 'Arial', sans-serif;
+      }
+
+      th{
+        width: 90px;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, .7);
+        color: white;
+        text-align: center;
+      }
+
+      td{
+        text-align: center;
+      }
+
+      .blank{
+        width: 90px;
+        height: 40px;
+        padding: 10px;
+      }
+
+      .disabled{
+        width: 90px;
+        height: 40px;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, .3);
+        color: black;
+      }
+
+      .active{
+        width: 90px;
+        height: 40px;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, .5);
+        color: white;
+      }
+
+      .current{
+        background-color: rgba(0, 0, 0, .7);
+      }
+
+      #controls{
+        display: flex;
+        margin-left: 1.5px;
+      }
+
+      #controls h3{
+        margin: 0px 10px 0px 10px;
+      }
+
+      #controls button{
+        width: 111px;
+        background-color: rgba(0, 0, 0, .8);
+        color: white;
+        border: none;
+      }
+
+      #year_month_name{
+      	width: 205px;
+      	text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h2> Calendar </h2>
+
+    <div id="controls">
+      <button id="previous"> Previous </button>
+      <h3 id="year_month_name"></h3>
+      <button id="next"> Next </button>
+    </div>
+
+    <table>
+    	<tbody>
+    		<th> Sunday </th>
+	        <th> Monday </th>
+	        <th> Tuesday </th>
+	        <th> Wednesday </th>
+	        <th> Thursday </th>
+	        <th> Friday </th>
+	        <th> Saturday </th>
+    	</tbody>
+    </table>
+
+    <table id="calendar">
+      <tbody>
+
+      </tbody>
+    </table>
+
+    <script type="text/javascript">
+      function getMonthName(month_number){
+        switch(month_number){
+          case 0:
+            return 'January';
+            break;
+          case 1:
+            return 'February';
+            break;
+          case 2:
+            return 'March';
+            break;
+          case 3:
+            return 'April';
+            break;
+          case 4:
+            return 'May';
+            break;
+          case 5:
+            return 'June';
+            break;
+          case 6:
+            return 'July';
+            break;
+          case 7:
+            return 'August';
+            break;
+          case 8:
+            return 'September';
+            break;
+          case 9:
+            return 'October';
+            break;
+          case 10:
+            return 'November';
+            break;
+          case 11:
+            return 'December';
+            break;
+        }
+      }
+
+      function startCalendar(year_pointer, month_pointer, date_pointer){
+        let calendar = document.getElementById('calendar');
+        calendar.removeChild(calendar.children[0]);
+        calendar.appendChild(document.createElement('tbody'));
+
+        document.getElementById('year_month_name').innerHTML = year_pointer + " " + getMonthName(month_pointer);
+
+        let first_day = new Date(year_pointer, month_pointer, 1);
+        let last_day = new Date(year_pointer, month_pointer + 1, 0);
+
+        calendar = document.getElementById('calendar');
+        let table_row = document.createElement('tr');
+
+        for(let i = 0; i < first_day.getDay(); i++){
+          let disabledDate = document.createElement('td');
+          disabledDate.className = "blank";
+
+          table_row.appendChild(disabledDate);
+        }
+
+        calendar.children[0].appendChild(table_row);
+
+        let current_date_pointer = 0;
+
+        for(let k = first_day.getDay(); k <= 6; k++){
+          let activeDate = document.createElement('td');
+          activeDate.className = "active";
+          current_date_pointer++;
+          activeDate.innerHTML = current_date_pointer;
+
+          calendar.children[0].children[0].appendChild(activeDate);
+        }
+
+        for(let x = current_date_pointer; x <= last_day.getDate(); x++){
+          calendar.children[0].appendChild(table_row);
+          table_row = document.createElement('tr');
+
+          for(var j = 0; j <= 6; j++){
+            let activeDate = document.createElement('td');
+            activeDate.className = "active";
+            current_date_pointer++;
+            activeDate.innerHTML = current_date_pointer;
+
+            let current_date = new Date();
+
+            if(new Date(year_pointer+"-"+month_pointer+"-"+current_date_pointer) - new Date(new Date().getFullYear()+"-"+new Date().getMonth()+"-"+new Date().getDate()) == 0){
+              activeDate.classList.add("current");
+            }
+
+            table_row.appendChild(activeDate);
+
+            if(current_date_pointer == last_day.getDate()){
+              calendar.children[0].appendChild(table_row);
+              return;
+            }
+          }
+        }
+
+        for(let i = last_day.getDay(); i < 6; i++){
+          let disabledDate = document.createElement('td');
+          disabledDate.className = "disabled";
+
+          calendar.children[0].children[calendar.children[0].length-1].appendChild(disabledDate);
+        }
+
+        current_date_pointer = 1;
+      }
+
+      let date_pointer = (new Date()).getDate();
+      let month_pointer = (new Date()).getMonth();
+      let year_pointer = (new Date()).getFullYear();
+      startCalendar(year_pointer, month_pointer, date_pointer);
+
+      document.getElementById('previous').onclick = function(){
+      	month_pointer -= 1;
+
+      	if(month_pointer == -1){
+        	month_pointer = 11;
+        	year_pointer -= 1;
+      	}
+
+        startCalendar(year_pointer, month_pointer, date_pointer);
+      }
+
+      document.getElementById('next').onclick = function(){
+      	month_pointer += 1;
+
+      	if(month_pointer == 12){
+        	month_pointer = 0;
+        	year_pointer += 1;
+      	}
+
+        startCalendar(year_pointer, month_pointer, date_pointer);
+      }
+    </script>
+  </body>
+</html>
